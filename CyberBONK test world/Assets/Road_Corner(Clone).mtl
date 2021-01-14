@@ -1,0 +1,16 @@
+newmtl Road
+Kd 0.07547168 0.07547168 0.07547168
+d 1
+
+newmtl Curb
+Kd 0.8584906 0.8584906 0.8584906
+d 1
+
+newmtl Gutter
+Kd 1 1 1
+d 1
+
+newmtl Road_1
+Kd 0.1442329 0.1442329 0.1442329
+d 1
+
