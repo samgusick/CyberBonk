@@ -26,9 +26,15 @@ public class NPCBehaviour : MonoBehaviour
 
     void die()
     {
+
+        if (agent.isActiveAndEnabled)
+        {
+            agent.isStopped = true;
+            agent.enabled = false;
+        }
+
+        
         isAlive = false;
-        agent.isStopped = true;
-        agent.enabled = false;
         foreach (var item in rigidbodies)
         {
             item.isKinematic = false;

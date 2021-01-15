@@ -15,7 +15,7 @@ public class PlayerManager : MonoBehaviour
 
         if (transform.position.y < -10)
         {
-            transform.position = transform.position + Vector3.up * 20;
+            transform.position = new Vector3(transform.position.x, 4, transform.position.z);
         }
 
 

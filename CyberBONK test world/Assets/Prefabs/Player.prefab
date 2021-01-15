@@ -1583,6 +1583,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a6024a49e094074aadae466e59f70c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  camera: {fileID: 5712480674258387232}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 64
   armsAnimator: {fileID: 7800530017516501404}
 --- !u!1 &5696893121942631581
 GameObject:

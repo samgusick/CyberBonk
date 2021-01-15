@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.AI;
 public class EndlessTerrain : MonoBehaviour
 {
+    public int maxBuildingHeight;
     public float buildingSpacing;
     public GameObject billboardPrefab;
     public const float maxViewDst = 100;
@@ -78,7 +79,7 @@ public class EndlessTerrain : MonoBehaviour
                 }
                 else
                 {
-                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, buildingSpacing, transform, buildingMaterials, windowBlocks ,buildingBlocks, buildingTops, chunkPrefab, billboardPrefab));
+                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, buildingSpacing, transform, buildingMaterials, windowBlocks ,buildingBlocks, buildingTops, chunkPrefab, billboardPrefab, maxBuildingHeight));
                 }
 
             }
@@ -87,6 +88,7 @@ public class EndlessTerrain : MonoBehaviour
 
     public class TerrainChunk
     {
+        int maxBuildingHeight;
         float[,] noiseMap;
         Vector2 position;
         Vector2 coordinates;
@@ -102,10 +104,12 @@ public class EndlessTerrain : MonoBehaviour
         GameObject billboardPrefab;
 
         float buildingSpacing;
-        public TerrainChunk(Vector2 coord, int size, float buildingSpacing, Transform parent, Material[] buildingMats, GameObject[] windowBlocks,GameObject[] buildingBlocks, GameObject[] buildingTops, GameObject chunkPrefab, GameObject billboardPrefab)
+        public TerrainChunk(Vector2 coord, int size, float buildingSpacing, Transform parent, Material[] buildingMats, GameObject[] windowBlocks,GameObject[] buildingBlocks, GameObject[] buildingTops, GameObject chunkPrefab, GameObject billboardPrefab, int maxBuildingHeight)
         {
-
+            
+            
             noiseMap = Noise.GenerateNoiseMap(mapGenerator.mapWidth, mapGenerator.mapHeight,mapGenerator.seed, mapGenerator.noiseScale, mapGenerator.octaves, mapGenerator.persistance, mapGenerator.lacunarity, 10 * coord * Vector2.one);
+            this.maxBuildingHeight = maxBuildingHeight;
             this.billboardPrefab = billboardPrefab;
             this.buildingSpacing = buildingSpacing;
             this.chunkPrefab = chunkPrefab;
@@ -224,19 +228,20 @@ public class EndlessTerrain : MonoBehaviour
                         building.transform.position = buildingPosition;
                         window.transform.position = buildingPosition;
                         
-                        int heightData = (int)(10 * noiseMap[x, z]);
+
+                        int heightData = Mathf.Clamp((int)(10 * noiseMap[x, z]), 0, maxBuildingHeight);
                         Color windowColor = mapGenerator.windowGradient.Evaluate(Random.Range(0f, 1f));
 
-                        if (x == 2 || x == 7 || z == 2 || z == 7 && heightData > 3)
-                        {
-                            if (z % 3 == 0 || x % 3 == 0)
-                            {
-                                Vector3[] billboardData = billboardLocation(x, z, buildingPosition, heightData);
-                                GameObject billboard = GameObject.Instantiate(billboardPrefab, billboardData[0], Quaternion.Euler(billboardData[1].x, billboardData[1].y, billboardData[1].z));
-                                billboard.transform.parent = Chunk.transform;
-                            }
-                            //int chanceOfBillboard = Random.Range(0, 10);
-                        }
+                        // if (x == 2 || x == 7 || z == 2 || z == 7 && heightData > 3)
+                        // {
+                        //     if (z % 3 == 0 || x % 3 == 0)
+                        //     {
+                        //         Vector3[] billboardData = billboardLocation(x, z, buildingPosition, heightData);
+                        //         GameObject billboard = GameObject.Instantiate(billboardPrefab, billboardData[0], Quaternion.Euler(billboardData[1].x, billboardData[1].y, billboardData[1].z));
+                        //         billboard.transform.parent = Chunk.transform;
+                        //     }
+                        //     //int chanceOfBillboard = Random.Range(0, 10);
+                        // }
 
                         for (int y = 0; y < heightData + 1; y++)
                         {
