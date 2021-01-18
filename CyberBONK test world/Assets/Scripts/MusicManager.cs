@@ -5,6 +5,8 @@ using UnityEngine;
 public class MusicManager : MonoBehaviour
 {
     public static bool musicOn;
+
+    public static float startAt;
     public static new AudioSource audio;
 
     private void Update() {
@@ -21,9 +23,16 @@ public class MusicManager : MonoBehaviour
         {
             pauseMusic();
         }
+
+        if (PlayerManager.health <= 0)
+        {
+            stopMusic();
+        }
     }
     private void Start() {
         audio = GetComponent<AudioSource>();
+        startAt = Random.Range(0f, audio.clip.length);
+        audio.time = startAt;
         playMusic();
         musicOn = true;
     }
@@ -31,7 +40,6 @@ public class MusicManager : MonoBehaviour
     public static void playMusic()
     {
         audio.Play();
-
     }
 
     public static void pauseMusic()

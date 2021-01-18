@@ -5,6 +5,7 @@ using UnityEngine;
 public class playerMovement : MonoBehaviour
 {
     public static Transform player;
+    public static GameObject playerCameraObject;
     public float speed = 12f;
     //public float gravity = -9.81f;
     public float jumpForce = 100f;
@@ -21,9 +22,10 @@ public class playerMovement : MonoBehaviour
     public Animator animator;
 
 
-    private void Awake() {
+    private void Start() {
         player = this.transform;
         animator = GetComponentInChildren<Animator>();
+        playerCameraObject = GetComponentInChildren<Camera>().gameObject;
     }
 
     private void Update() {

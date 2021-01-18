@@ -60,6 +60,9 @@ public class InputHandling : MonoBehaviour
     } 
 
     public void LeftClick_Pressed(){
-        transform.parent.GetComponentInChildren<GunManagment>().fireWeapon();
+        if (PlayerManager.health > 0)
+        {
+            transform.parent.GetComponentInChildren<GunManagment>().fireWeapon();
+        }
     }
 }

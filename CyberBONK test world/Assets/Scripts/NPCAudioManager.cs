@@ -77,6 +77,13 @@ public class NPCAudioManager : MonoBehaviour
                 textHandling.setText("Well, C*m");
                 break;
 
+            case (5):
+                textHandling.setText("You're breathtaking!");
+                break;
+
+            case (6):
+                textHandling.setText("Wake the f*ck up, samurai. We have a city to burn");
+                break;
 
 
 

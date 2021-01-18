@@ -13,7 +13,15 @@ public class NPCTextHandling : MonoBehaviour
     }
 
     private void Update() {
-        canvas.transform.LookAt(Camera.main.transform, Vector3.up);
+        try
+        {
+            canvas.transform.LookAt(Camera.main.transform, Vector3.up);
+        }
+        catch
+        {
+            
+        }
+
         
     }
 

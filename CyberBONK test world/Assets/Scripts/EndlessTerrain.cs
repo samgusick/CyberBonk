@@ -7,6 +7,8 @@ public class EndlessTerrain : MonoBehaviour
     public int maxBuildingHeight;
     public float buildingSpacing;
     public GameObject billboardPrefab;
+
+    public GameObject navMeshPlane;
     public const float maxViewDst = 100;
     public Transform viewer;
     public GameObject[] buildingBlocks;
@@ -79,7 +81,7 @@ public class EndlessTerrain : MonoBehaviour
                 }
                 else
                 {
-                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, buildingSpacing, transform, buildingMaterials, windowBlocks ,buildingBlocks, buildingTops, chunkPrefab, billboardPrefab, maxBuildingHeight));
+                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, buildingSpacing, transform, buildingMaterials, windowBlocks ,buildingBlocks, buildingTops, chunkPrefab, billboardPrefab, maxBuildingHeight, navMeshPlane));
                 }
 
             }
@@ -95,6 +97,7 @@ public class EndlessTerrain : MonoBehaviour
         Vector3 positionV3;
         Bounds bounds;
         GameObject Chunk;
+        GameObject navMeshPlane;
         GameObject[] buildingBlocks;
         GameObject[] buildingTops;
         Material[] buildingMats;
@@ -104,7 +107,7 @@ public class EndlessTerrain : MonoBehaviour
         GameObject billboardPrefab;
 
         float buildingSpacing;
-        public TerrainChunk(Vector2 coord, int size, float buildingSpacing, Transform parent, Material[] buildingMats, GameObject[] windowBlocks,GameObject[] buildingBlocks, GameObject[] buildingTops, GameObject chunkPrefab, GameObject billboardPrefab, int maxBuildingHeight)
+        public TerrainChunk(Vector2 coord, int size, float buildingSpacing, Transform parent, Material[] buildingMats, GameObject[] windowBlocks,GameObject[] buildingBlocks, GameObject[] buildingTops, GameObject chunkPrefab, GameObject billboardPrefab, int maxBuildingHeight, GameObject navMeshPlane)
         {
             
             
@@ -117,6 +120,7 @@ public class EndlessTerrain : MonoBehaviour
             this.buildingTops = buildingTops;
             this.buildingMats = buildingMats;
             this.windowBlocks = windowBlocks;
+            this.navMeshPlane = navMeshPlane;
             position = coord * size;
             coordinates = coord;
             bounds = new Bounds(position, Vector2.one * size);
@@ -126,27 +130,27 @@ public class EndlessTerrain : MonoBehaviour
             Chunk.name = "Chunk " + position.x + ", " + position.y;
             //Chunk.transform.position = positionV3;
             //Chunk.transform.localScale = Vector3.one * 10;
+            
+            Vector3 planePosition = new Vector3(positionV3.x, navMeshPlane.transform.position.y ,positionV3.z);
 
+            GameObject navMesh = GameObject.Instantiate(navMeshPlane, planePosition, navMeshPlane.transform.rotation);
             mapGenerator.RequestMapData(OnMapDataRecieved);
 
             Chunk.transform.parent = parent;
             
             try 
             {
-                Chunk.GetComponentInChildren<NavMeshSurface>().BuildNavMesh();
+                //Chunk.GetComponentInChildren<NavMeshSurface>().BuildNavMesh();
+                Chunk.GetComponentInChildren<ChunkControl>().enableNPCs();
             }
 
             catch
             {
                 
             }
-            //Chunk.GetComponent<MeshRenderer>().enabled = false;
-            // NPCSpawnerScript[] spawners = Chunk.GetComponentsInChildren<NPCSpawnerScript>();
 
-            // foreach (var item in spawners)
-            // {
-            //     item.enabled = true;
-            // }
+            navMesh.GetComponent<NavMeshSurface>().BuildNavMesh();
+            Chunk.GetComponent<MeshRenderer>().enabled = false;
             SetVisible(false);
         }
 
@@ -232,16 +236,17 @@ public class EndlessTerrain : MonoBehaviour
                         int heightData = Mathf.Clamp((int)(10 * noiseMap[x, z]), 0, maxBuildingHeight);
                         Color windowColor = mapGenerator.windowGradient.Evaluate(Random.Range(0f, 1f));
 
-                        // if (x == 2 || x == 7 || z == 2 || z == 7 && heightData > 3)
-                        // {
-                        //     if (z % 3 == 0 || x % 3 == 0)
-                        //     {
-                        //         Vector3[] billboardData = billboardLocation(x, z, buildingPosition, heightData);
-                        //         GameObject billboard = GameObject.Instantiate(billboardPrefab, billboardData[0], Quaternion.Euler(billboardData[1].x, billboardData[1].y, billboardData[1].z));
-                        //         billboard.transform.parent = Chunk.transform;
-                        //     }
-                        //     //int chanceOfBillboard = Random.Range(0, 10);
-                        // }
+                        if (x == 2 || x == 7 || z == 2 || z == 7 && heightData > 3)
+                        {
+                            if (z % 3 == 0 || x % 3 == 0)
+                            {
+                                Vector3[] billboardData = billboardLocation(x, z, buildingPosition, heightData);
+                                GameObject billboard = GameObject.Instantiate(billboardPrefab, billboardData[0], Quaternion.Euler(billboardData[1].x, billboardData[1].y, billboardData[1].z));
+                                billboard.transform.localScale = new Vector3(billboard.transform.localScale.x, billboard.transform.localScale.y * Random.Range(1f, 2f), billboard.transform.localScale.z * Random.Range(1f, 2f));
+                                //billboard.transform.parent = Chunk.transform;
+                            }
+                            //int chanceOfBillboard = Random.Range(0, 10);
+                        }
 
                         for (int y = 0; y < heightData + 1; y++)
                         {
@@ -293,7 +298,7 @@ public class EndlessTerrain : MonoBehaviour
                         building.GetComponent<MeshFilter>().mesh = new Mesh();
                         building.GetComponent<MeshFilter>().mesh.CombineMeshes(combineBuildings);
                         building.GetComponent<Renderer>().material = buildingMats[0];
-
+                        building.layer = 10;
                         
                         window.AddComponent<MeshFilter>();
                         window.AddComponent<MeshRenderer>();
@@ -301,11 +306,13 @@ public class EndlessTerrain : MonoBehaviour
                         window.GetComponent<MeshFilter>().mesh.CombineMeshes(combineWindows);
                         window.GetComponent<Renderer>().material = buildingMats[1];
                         window.GetComponent<Renderer>().material.SetVector("_EmissionColor", 2 * windowColor);;
-
+                        window.layer = 10;
 
                         building.transform.position = Vector3.zero;
                         building.transform.parent = Chunk.transform;
                         building.AddComponent<MeshCollider>();
+                        //building.AddComponent<NavMeshObstacle>().carving = true;
+
                         
                         window.transform.position = Vector3.zero;
                          window.transform.parent = Chunk.transform;
