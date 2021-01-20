@@ -6,11 +6,11 @@ using UnityEngine.AI;
 
 public class NPCBehaviour : MonoBehaviour
 {
-    public static bool attacking = false;
+    public static bool attacking;
     public bool isAlive;
     bool hasRoute;
     bool hasRouteToPlayer;
-    NavMeshAgent agent;
+    public NavMeshAgent agent;
 
     public Transform playerReference;
     public LayerMask environment;
@@ -31,7 +31,7 @@ public class NPCBehaviour : MonoBehaviour
     Collider[] colliders;
     Rigidbody[] rigidbodies;
 
-    private void Start() {
+    public void Start() {
         attacking = false;    
     }
     void die()
@@ -114,7 +114,6 @@ public class NPCBehaviour : MonoBehaviour
         {
             animator.SetFloat("moveSpeed", agent.velocity.magnitude);
             animator.SetBool("isAttacking", false);
-            print(agent.speed);
             if (agent.velocity.magnitude > 1f)
             {
                 animator.SetBool("isMoving", true);
@@ -144,7 +143,7 @@ public class NPCBehaviour : MonoBehaviour
         {
             animator.SetFloat("moveSpeed", agent.velocity.magnitude);
             animator.SetBool("isAttacking", true);
-            //print(agent.speed);
+        
             if (agent.velocity.magnitude > 1f)
             {
                 animator.SetBool("isMoving", true);

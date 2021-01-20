@@ -12,9 +12,13 @@ public class PlayerManager : MonoBehaviour
     public static float health;
     public static float startHealth;
 
+    public static GameObject player;
     public Animator bleedingAnimator;
     public static GameObject playerCameraObject;
 
+    private void Awake() {
+        player = this.gameObject;
+    }
     private void Start()
     {
         health = 500f;
@@ -68,12 +72,9 @@ public class PlayerManager : MonoBehaviour
         yield return new WaitForSeconds(2);
         //playerCamera.SetActive(false);
         GetComponent<Rigidbody>().freezeRotation = true;
+        GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
         deathCamera.SetActive(true);
 
-    }
-    public void spawnNPCs()
-    {
-        //NPCSpawner.SetActive(true);
     }
 
     public void takeDamage()
@@ -81,16 +82,5 @@ public class PlayerManager : MonoBehaviour
         bleedingAnimator.SetBool("TakenDamage", true);
         health -= 5;
         print(health);
-    }
-
-    IEnumerator delaySpawn()
-    {
-        while (true)
-        {
-            //NPCSpawner.SetActive(false);
-            yield return new WaitForSeconds(10);
-            spawnNPCs();
-        }
-        yield break;
     }
 }

@@ -872,14 +872,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5695184420171464582}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0e3b095f7da63a9499483637ae3d2db5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   npcPrefab: {fileID: 2548637875646241809, guid: 8f49c4653ed726a4d9ff24ef36ace666, type: 3}
   NumberOfNPCs: 4
-  spawnRadius: 10
+  spawnRadius: 150
 --- !u!1 &5695506188838764227
 GameObject:
   m_ObjectHideFlags: 0

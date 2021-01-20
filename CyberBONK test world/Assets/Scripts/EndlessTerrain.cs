@@ -7,7 +7,6 @@ public class EndlessTerrain : MonoBehaviour
     public int maxBuildingHeight;
     public float buildingSpacing;
     public GameObject billboardPrefab;
-
     public GameObject navMeshPlane;
     public const float maxViewDst = 100;
     public Transform viewer;
@@ -25,6 +24,7 @@ public class EndlessTerrain : MonoBehaviour
 
     void Start()
     {
+        StopAllCoroutines();
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         mapGenerator = FindObjectOfType<ChunkGenAndManage>();
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
@@ -105,6 +105,9 @@ public class EndlessTerrain : MonoBehaviour
 
         GameObject chunkPrefab;
         GameObject billboardPrefab;
+        GameObject spawner;
+
+        Transform[] objectsInChunk;
 
         float buildingSpacing;
         public TerrainChunk(Vector2 coord, int size, float buildingSpacing, Transform parent, Material[] buildingMats, GameObject[] windowBlocks,GameObject[] buildingBlocks, GameObject[] buildingTops, GameObject chunkPrefab, GameObject billboardPrefab, int maxBuildingHeight, GameObject navMeshPlane)
@@ -112,6 +115,7 @@ public class EndlessTerrain : MonoBehaviour
             
             
             noiseMap = Noise.GenerateNoiseMap(mapGenerator.mapWidth, mapGenerator.mapHeight,mapGenerator.seed, mapGenerator.noiseScale, mapGenerator.octaves, mapGenerator.persistance, mapGenerator.lacunarity, 10 * coord * Vector2.one);
+        
             this.maxBuildingHeight = maxBuildingHeight;
             this.billboardPrefab = billboardPrefab;
             this.buildingSpacing = buildingSpacing;
@@ -132,26 +136,20 @@ public class EndlessTerrain : MonoBehaviour
             //Chunk.transform.localScale = Vector3.one * 10;
             
             Vector3 planePosition = new Vector3(positionV3.x, navMeshPlane.transform.position.y ,positionV3.z);
-
-            GameObject navMesh = GameObject.Instantiate(navMeshPlane, planePosition, navMeshPlane.transform.rotation);
+                
+            //GameObject navMesh = GameObject.Instantiate(navMeshPlane, planePosition, navMeshPlane.transform.rotation);
+            
             mapGenerator.RequestMapData(OnMapDataRecieved);
 
             Chunk.transform.parent = parent;
+
+            //navMesh.GetComponent<NavMeshSurface>().BuildNavMesh();
+            //ChunkNPCSpawner.GetComponent<NPCSpawnerScript>().startTheSpawn();
+
+            objectsInChunk = Chunk.GetComponentsInChildren<Transform>(false);
             
-            try 
-            {
-                //Chunk.GetComponentInChildren<NavMeshSurface>().BuildNavMesh();
-                Chunk.GetComponentInChildren<ChunkControl>().enableNPCs();
-            }
-
-            catch
-            {
-                
-            }
-
-            navMesh.GetComponent<NavMeshSurface>().BuildNavMesh();
-            Chunk.GetComponent<MeshRenderer>().enabled = false;
-            SetVisible(false);
+            //Chunk.GetComponentInChildren<NPCSpawnerScript>().startTheSpawn();
+            //SetVisible(false);
         }
 
         void OnMapDataRecieved(MapData map)
@@ -207,20 +205,10 @@ public class EndlessTerrain : MonoBehaviour
                 for (int z = 0; z < 10; z++)
                 {
 
+                    
                     Vector3 buildingPosition = new Vector3(positionV3.x - (buildingSpacing * 5) + (x * buildingSpacing), 0, positionV3.z - (buildingSpacing * 5) + (z * buildingSpacing));
                     if (x == 0 || z == 0 || (x % 9 == 0) || (z % 9 == 0) || x == 1 || z == 1 ||  ((x + 1) % 9 == 0) || ((z + 1) % 9 == 0))
                     {
-                        // GameObject road;
-                        // if (x == z)
-                        // {
-                        //     road = Instantiate(buildingBlocks[2], Vector3.zero, buildingBlocks[2].transform.rotation);
-                        // }
-                        // else
-                        // {
-                        //     road = GameObject.Instantiate(buildingBlocks[1], Vector3.zero, buildingBlocks[1].transform.rotation);
-                        // }
-                        // road.transform.position = new Vector3(buildingPosition.x, -.2f, buildingPosition.z + 10);
-                        // road.transform.parent = Chunk.transform;
 
                     }
                     else
@@ -258,8 +246,8 @@ public class EndlessTerrain : MonoBehaviour
                             
                             buildingBlock.AddComponent<MeshCollider>().convex = true;
 
-                            buildingBlock.transform.position = new Vector3(buildingPosition.x, (10 * y), buildingPosition.z);
-                            windowBlock.transform.position = new Vector3(buildingPosition.x, (10 * y), buildingPosition.z);
+                            buildingBlock.transform.position = new Vector3(buildingPosition.x, ((10 * y)), buildingPosition.z);
+                            windowBlock.transform.position = new Vector3(buildingPosition.x, ((10 * y)), buildingPosition.z);
                             
                             buildingBlock.transform.parent = building.transform;
                             windowBlock.transform.parent = window.transform;
@@ -312,7 +300,7 @@ public class EndlessTerrain : MonoBehaviour
                         building.transform.parent = Chunk.transform;
                         building.AddComponent<MeshCollider>();
                         //building.AddComponent<NavMeshObstacle>().carving = true;
-
+                        building.isStatic = true;
                         
                         window.transform.position = Vector3.zero;
                          window.transform.parent = Chunk.transform;
@@ -330,13 +318,22 @@ public class EndlessTerrain : MonoBehaviour
             SetVisible(visible);
         }
 
+
         public void SetVisible(bool visible)
         {
-            Chunk.SetActive(visible);
+            foreach (var item in objectsInChunk)
+            {
+                try
+                {
+                    item.gameObject.GetComponent<Renderer>().enabled = visible;
+                }
+                catch
+                {
+                }
+            }
+            //Chunk.SetActive(visible);
         }
-
-
-
+        
         public bool IsVisible()
         {
             return Chunk.activeSelf;

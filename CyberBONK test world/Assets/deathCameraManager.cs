@@ -14,7 +14,7 @@ public class deathCameraManager : MonoBehaviour
     public Animator animator;
 
     public Animator fadeFromBlack;
-    public AudioSource audio;
+    public new AudioSource audio;
 
     private void Awake()
     {

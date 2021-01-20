@@ -18,7 +18,9 @@ public class NPCGunManager : MonoBehaviour
         firingGun = false;
     }
 
-
+    private void Start() {
+        StopAllCoroutines();
+    }
 
     private void Update() {
         if (NPCBehaviour.attacking && !firingGun && NPCReference.GetComponent<NPCBehaviour>().isAlive)
@@ -34,6 +36,9 @@ public class NPCGunManager : MonoBehaviour
     {
         while (NPCBehaviour.attacking && NPCReference.GetComponent<NPCBehaviour>().isAlive && PlayerManager.health > 0)
         {
+            if (!GetComponentInParent<NPCBehaviour>().agent.isStopped)
+            {
+                gunEnd.GetComponent<AudioSource>().time = 0;
             RaycastHit hit;
             gunEnd.GetComponent<ParticleSystem>().Play();
             gunEnd.GetComponent<AudioSource>().Play();
@@ -50,6 +55,11 @@ public class NPCGunManager : MonoBehaviour
 
             float timeOffset = Random.Range(-2f, 2f);
             yield return new WaitForSeconds(timeBetweenShots + timeOffset);
+            }
+            else
+            {
+                yield return null;
+            }
         
         }
 
