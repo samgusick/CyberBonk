@@ -7,14 +7,13 @@ public class PlayerAudioManager : MonoBehaviour
     // Start is called before the first frame update
 
     FirstPersonAIO playerMoveReference;
-    Animator animator;
+    public Animator animator;
     public AudioClip[] playerAudioClips;
     new AudioSource audio;
 
     void Start()
     {
         playerMoveReference = GetComponentInChildren<FirstPersonAIO>();
-        animator = GetComponentInChildren<Animator>();
         audio = GetComponent<AudioSource>();
     }
 

@@ -5,28 +5,62 @@ using UnityEngine;
 public class GunManagment : MonoBehaviour
 {
     Weapon pistol;
+    Weapon rifle;
     public PlayerManager playerManager;
     public GameObject handgunEnd;
+
+    public Camera mainCamera;
+
+    public GameObject assaultRifleEnd;
     public GameObject bloodSplatterObject;
     public List<Weapon> weaponStatsArray;
     public List<GameObject> weaponTypesArray;
-    int weaponEquippedID = 0;
+    public int weaponEquippedID = 0;
 
     void Start()
     {
+        gunActivation();
         weaponStatsArray = new List<Weapon>();
         //weaponTypesArray = new List<GameObject>();
         pistol = new Weapon("Pistol", 0, 15, false, handgunEnd);
+        rifle = new Weapon("Rifle", .1f, 5, true, assaultRifleEnd);
         weaponStatsArray.Add(pistol);
+        weaponStatsArray.Add(rifle);
+        canFireAgain = true;
 
     }
 
-    private void Update() {
-        
+    void gunActivation()
+    {
+        foreach (var item in weaponTypesArray)
+        {
+            if (item != weaponTypesArray[weaponEquippedID])
+            {
+                item.SetActive(false);
+            }
+        }
+
+
+        weaponTypesArray[weaponEquippedID].SetActive(true);
+    }
+    private void Update()
+    {
+        if (Input.GetKey(KeyCode.Alpha1))
+        {
+            weaponEquippedID = 0;
+            gunActivation();
+        }
+
+        else if (Input.GetKey(KeyCode.Alpha2))
+        {
+            weaponEquippedID = 1;
+            gunActivation();
+        }
     }
 
     void fireGunParticles()
     {
+        weaponTypesArray[weaponEquippedID].GetComponentInChildren<ParticleSystem>().Stop();
         weaponTypesArray[weaponEquippedID].GetComponentInChildren<ParticleSystem>().Play();
     }
 
@@ -38,7 +72,7 @@ public class GunManagment : MonoBehaviour
 
             playerManager.animator.Play("isShootingHip", 1, 0f);
         }
-        else if(playerManager.animator.GetBool("isShooting") && playerManager.animator.GetBool("isScoped"))
+        else if (playerManager.animator.GetBool("isShooting") && playerManager.animator.GetBool("isScoped"))
         {
             playerManager.animator.Play("IsShootingScoped", 1, 0f);
         }
@@ -51,7 +85,7 @@ public class GunManagment : MonoBehaviour
 
     void playFireSound()
     {
-         weaponTypesArray[weaponEquippedID].GetComponentInChildren<AudioSource>().Play();
+        weaponTypesArray[weaponEquippedID].GetComponentInChildren<AudioSource>().Play();
     }
 
     void splatterBlood(Ray ray, RaycastHit raycastHit)
@@ -59,29 +93,37 @@ public class GunManagment : MonoBehaviour
         Instantiate(bloodSplatterObject, raycastHit.point, Quaternion.LookRotation(ray.origin));
     }
 
-    public void fireWeapon()
+
+    public bool canFireAgain;
+    public void fireWeapon(float timeBetweenShots)
     {
-        Vector3 rayPos = new Vector3(Screen.width/2f, Screen.height/2f, 0);
-        RaycastHit raycastHit;
-        Ray ray = Camera.main.ScreenPointToRay(rayPos);
-
-        fireGunParticles();
-        playGunAnimation();
-        playFireSound();
-        if (Physics.Raycast(ray, out raycastHit))
+        if (canFireAgain)
         {
-            //Debug.DrawLine(weaponStatsArray[weaponEquippedID].weaponEnd.transform.position, raycastHit.point, Color.red, 5f);
-            if (raycastHit.transform.gameObject.tag == "NPC")
-            {
-                splatterBlood(ray, raycastHit);
-                raycastHit.transform.gameObject.GetComponentInParent<NPCBehaviour>().takeDamage(weaponStatsArray[weaponEquippedID].damagePerbullet);
-            }
-        }
+            Vector3 rayPos = new Vector3(Screen.width / 2f, Screen.height / 2f, 0);
+            RaycastHit raycastHit;
+            Ray ray = mainCamera.ScreenPointToRay(rayPos);
 
+            fireGunParticles();
+            playGunAnimation();
+            playFireSound();
+            if (Physics.Raycast(ray, out raycastHit))
+            {
+                //Debug.DrawLine(weaponStatsArray[weaponEquippedID].weaponEnd.transform.position, raycastHit.point, Color.red, 5f);
+                if (raycastHit.transform.gameObject.tag == "NPC")
+                {
+                    splatterBlood(ray, raycastHit);
+                    raycastHit.transform.gameObject.GetComponentInParent<NPCBehaviour>().takeDamage(weaponStatsArray[weaponEquippedID].damagePerbullet);
+                }
+            }
+            StartCoroutine(waitUntilNextShot(timeBetweenShots));
+        }
     }
 
-    IEnumerator waitUntilNextShot()
+    IEnumerator waitUntilNextShot(float timeBetweenShots)
     {
+        canFireAgain = false;
+        yield return new WaitForSeconds(timeBetweenShots);
+        canFireAgain = true;
         yield break;
     }
 

@@ -17,7 +17,11 @@ public class MusicManager : MonoBehaviour
 
         if (musicOn)
         {
-            unpauseMusic();
+            if (!audio.isPlaying)
+            {
+                playMusic();
+            }
+            
         }
         else
         {

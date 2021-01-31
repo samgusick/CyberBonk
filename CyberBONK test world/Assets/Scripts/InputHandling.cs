@@ -26,6 +26,12 @@ public class InputHandling : MonoBehaviour
             LeftClick_Pressed();
         }
 
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            LeftClick_Hold();
+        }
+
+
         if (Input.GetKey(KeyCode.Mouse1))
         {
             rightClick_Hold();
@@ -60,9 +66,23 @@ public class InputHandling : MonoBehaviour
     } 
 
     public void LeftClick_Pressed(){
-        if (PlayerManager.health > 0)
+        int GunID = transform.parent.GetComponentInChildren<GunManagment>().weaponEquippedID;
+        List<Weapon> weaponArray = transform.parent.GetComponentInChildren<GunManagment>().weaponStatsArray;
+        bool isAutomatic = weaponArray[GunID].automatic;
+        if (PlayerManager.health > 0 && !isAutomatic)
         {
-            transform.parent.GetComponentInChildren<GunManagment>().fireWeapon();
+            transform.parent.GetComponentInChildren<GunManagment>().fireWeapon(weaponArray[GunID].fireRate);
+        }
+    }
+
+    public void LeftClick_Hold(){
+        int GunID = transform.parent.GetComponentInChildren<GunManagment>().weaponEquippedID;
+        List<Weapon> weaponArray = transform.parent.GetComponentInChildren<GunManagment>().weaponStatsArray;
+        bool isAutomatic = weaponArray[GunID].automatic;
+
+        if (PlayerManager.health > 0 && isAutomatic)
+        {
+            transform.parent.GetComponentInChildren<GunManagment>().fireWeapon(weaponArray[GunID].fireRate);
         }
     }
 }

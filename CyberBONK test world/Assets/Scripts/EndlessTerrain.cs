@@ -8,6 +8,8 @@ public class EndlessTerrain : MonoBehaviour
     public float buildingSpacing;
     public GameObject billboardPrefab;
     public GameObject navMeshPlane;
+
+    public GameObject carContainer;
     public const float maxViewDst = 100;
     public Transform viewer;
     public GameObject[] buildingBlocks;
@@ -29,7 +31,7 @@ public class EndlessTerrain : MonoBehaviour
         mapGenerator = FindObjectOfType<ChunkGenAndManage>();
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / chunkSize);
         player.transform.position = new Vector3((mapGenerator.mapWidth / 4 * chunkSize) - chunkSize / 2, 5, (mapGenerator.mapHeight / 4 * chunkSize) - chunkSize / 2);
-        StartCoroutine(clearBuildingBlocks());
+        //StartCoroutine(clearBuildingBlocks());
     }
 
     IEnumerator clearBuildingBlocks()
@@ -47,10 +49,19 @@ public class EndlessTerrain : MonoBehaviour
         }
     }
 
+    public Vector2 currentChunkPosition;
     void Update()
     {
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
         UpdateVisibleChunks();
+        try
+        {
+            carContainer.transform.position = new Vector3(currentChunkPosition.x * 100, 0, currentChunkPosition.y * 100);
+        }
+        catch
+        {
+            
+        }
     }
 
     void UpdateVisibleChunks()
@@ -65,6 +76,7 @@ public class EndlessTerrain : MonoBehaviour
         int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / chunkSize);
         int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / chunkSize);
 
+        currentChunkPosition = new Vector2(currentChunkCoordX, currentChunkCoordY);
         for (int yOffset = -chunksVisibleInViewDst; yOffset <= chunksVisibleInViewDst; yOffset++)
         {
             for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++)
@@ -115,7 +127,7 @@ public class EndlessTerrain : MonoBehaviour
             
             
             noiseMap = Noise.GenerateNoiseMap(mapGenerator.mapWidth, mapGenerator.mapHeight,mapGenerator.seed, mapGenerator.noiseScale, mapGenerator.octaves, mapGenerator.persistance, mapGenerator.lacunarity, 10 * coord * Vector2.one);
-        
+
             this.maxBuildingHeight = maxBuildingHeight;
             this.billboardPrefab = billboardPrefab;
             this.buildingSpacing = buildingSpacing;
@@ -132,13 +144,17 @@ public class EndlessTerrain : MonoBehaviour
             //Chunk = GameObject.CreatePrimitive(PrimitiveType.Plane);
             Chunk = Instantiate(chunkPrefab, positionV3, chunkPrefab.transform.rotation);
             Chunk.name = "Chunk " + position.x + ", " + position.y;
+
             //Chunk.transform.position = positionV3;
             //Chunk.transform.localScale = Vector3.one * 10;
             
             Vector3 planePosition = new Vector3(positionV3.x, navMeshPlane.transform.position.y ,positionV3.z);
                 
-            //GameObject navMesh = GameObject.Instantiate(navMeshPlane, planePosition, navMeshPlane.transform.rotation);
-            
+            GameObject navMesh = GameObject.Instantiate(navMeshPlane, planePosition, navMeshPlane.transform.rotation);
+            //GameObject cars = GameObject.Instantiate(carLoop, positionV3, carLoop.transform.rotation);
+
+            //cars.transform.parent = Chunk.transform;
+
             mapGenerator.RequestMapData(OnMapDataRecieved);
 
             Chunk.transform.parent = parent;
@@ -211,7 +227,7 @@ public class EndlessTerrain : MonoBehaviour
                     {
 
                     }
-                    else
+                    else 
                     {
 
                         GameObject building = new GameObject("Building");
@@ -299,8 +315,8 @@ public class EndlessTerrain : MonoBehaviour
                         building.transform.position = Vector3.zero;
                         building.transform.parent = Chunk.transform;
                         building.AddComponent<MeshCollider>();
-                        //building.AddComponent<NavMeshObstacle>().carving = true;
-                        building.isStatic = true;
+                        building.AddComponent<NavMeshObstacle>();
+                        //building.isStatic = true;
                         
                         window.transform.position = Vector3.zero;
                          window.transform.parent = Chunk.transform;

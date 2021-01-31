@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 public class NPCTextHandling : MonoBehaviour
 {
+    public static GameObject mainCamera;
     private Canvas canvas;
     private TextMeshProUGUI text;
     private void Awake() {
@@ -12,17 +13,16 @@ public class NPCTextHandling : MonoBehaviour
         text = GetComponentInChildren<TextMeshProUGUI>();
     }
 
+    private void Start() {
+        mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+    }
     private void Update() {
-        try
+    
+        if (text.text != "")
         {
-            canvas.transform.LookAt(Camera.main.transform, Vector3.up);
-        }
-        catch
-        {
-            
+            canvas.transform.LookAt(mainCamera.transform, Vector3.up);
         }
 
-        
     }
 
     public void setTextNull()

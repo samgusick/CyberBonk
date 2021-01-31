@@ -9,7 +9,6 @@ public class NPCBehaviour : MonoBehaviour
     public static bool attacking;
     public bool isAlive;
     bool hasRoute;
-    bool hasRouteToPlayer;
     public NavMeshAgent agent;
 
     public Transform playerReference;
@@ -26,14 +25,11 @@ public class NPCBehaviour : MonoBehaviour
     float health;
     float startingHealth = 100;
 
-
+    IEnumerator waitCoroutine;
     SkinnedMeshRenderer skinnedMesh;
     Collider[] colliders;
     Rigidbody[] rigidbodies;
 
-    public void Start() {
-        attacking = false;    
-    }
     void die()
     {
 
@@ -65,7 +61,6 @@ public class NPCBehaviour : MonoBehaviour
     }
     private void Awake()
     {
-        hasRouteToPlayer = false;
         hasRoute = false;
         isAlive = true;
         health = startingHealth;
@@ -76,7 +71,7 @@ public class NPCBehaviour : MonoBehaviour
         colliders = GetComponentsInChildren<Collider>();
         rigidbodies = GetComponentsInChildren<Rigidbody>();
         skinnedMesh = GetComponentInChildren<SkinnedMeshRenderer>();
-
+        newRoute();
 
         foreach (var item in rigidbodies)
         {
@@ -105,6 +100,12 @@ public class NPCBehaviour : MonoBehaviour
         agent.isStopped = false;
     }
 
+    IEnumerator waitThanNewRoute()
+    {
+        yield return new WaitForSeconds(15);
+        newRoute();
+        yield break;
+    }
     public void Update()
     {
 
@@ -123,10 +124,11 @@ public class NPCBehaviour : MonoBehaviour
                 animator.SetBool("isMoving", false);
             }
 
-            if (agent.remainingDistance < RerouteAtThisDistance)
+            if (agent.remainingDistance < RerouteAtThisDistance && waitCoroutine == null)
             {
                 hasRoute = false;
-                newRoute();
+                waitCoroutine = waitThanNewRoute();
+                StartCoroutine(waitCoroutine);
             }
 
             if (Vector3.Distance(transform.position, FirstPersonAIO.player.position) > inBoundsDistance)
@@ -141,6 +143,10 @@ public class NPCBehaviour : MonoBehaviour
 
         else if (isAlive && agent.isOnNavMesh && attacking)
         {
+            if (waitCoroutine != null)
+            {
+                StopCoroutine(waitCoroutine);
+            }
             animator.SetFloat("moveSpeed", agent.velocity.magnitude);
             animator.SetBool("isAttacking", true);
         
@@ -151,6 +157,15 @@ public class NPCBehaviour : MonoBehaviour
             else
             {
                 animator.SetBool("isMoving", false);
+            }
+
+            if (Vector3.Distance(transform.position, FirstPersonAIO.player.position) > inBoundsDistance)
+            {
+                hideNPC();
+            }
+            else
+            {
+                unhideNPC();
             }
             attack_getToPlayer();
         }
@@ -173,7 +188,7 @@ public class NPCBehaviour : MonoBehaviour
 
     public void newRoute()
     {
-        while (!hasRoute)
+        while (!hasRoute && !attacking)
         {
             RaycastHit hit;
             Vector3 raycastPosition = new Vector3(transform.position.x + Random.Range(-destinationRadius, destinationRadius), 400f, transform.position.z + Random.Range(-destinationRadius, destinationRadius));
@@ -184,6 +199,7 @@ public class NPCBehaviour : MonoBehaviour
                 {
                     agent.SetDestination(hit.point);
                     hasRoute = true;
+                    waitCoroutine = null;
                 }
             }
         }

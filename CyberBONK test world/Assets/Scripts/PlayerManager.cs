@@ -21,6 +21,7 @@ public class PlayerManager : MonoBehaviour
     }
     private void Start()
     {
+        NPCBehaviour.attacking = false;
         health = 500f;
         startHealth = health;
         playerCameraObject = GetComponentInChildren<Camera>().gameObject;
@@ -60,11 +61,12 @@ public class PlayerManager : MonoBehaviour
     public void death()
     {
         GetComponent<Rigidbody>().freezeRotation = false;
-        GetComponent<Rigidbody>().AddForce(-transform.forward * 10);
+        //GetComponent<Rigidbody>().AddForce(-transform.forward * 10);
         GetComponent<FirstPersonAIO>().enabled = false;
         animator.SetBool("isWalking", false);
-
+        GetComponent<Animator>().enabled = true;
         StartCoroutine(waitThenDeathScreen());
+        //playerCamera.GetComponent<AudioListener>().enabled = false;
     }
 
     IEnumerator waitThenDeathScreen()
@@ -81,6 +83,5 @@ public class PlayerManager : MonoBehaviour
     {
         bleedingAnimator.SetBool("TakenDamage", true);
         health -= 5;
-        print(health);
     }
 }

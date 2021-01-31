@@ -7,7 +7,8 @@ public class NPCGunManager : MonoBehaviour
 {
     public GameObject gunEnd;
     public float timeBetweenShots;
-
+    
+    public ParticleSystem gunTrail;
     bool isLookingAtPlayer;
     public LayerMask layer;
     public Transform NPCReference;
@@ -42,11 +43,11 @@ public class NPCGunManager : MonoBehaviour
             RaycastHit hit;
             gunEnd.GetComponent<ParticleSystem>().Play();
             gunEnd.GetComponent<AudioSource>().Play();
+            gunTrail.Play();
             
             if (Physics.Raycast(gunEnd.transform.position, NPCReference.forward, out hit ,50, layer))
             {
-                Debug.DrawLine(gunEnd.transform.position, hit.point, Color.blue, 2f);
-                print(hit.collider.gameObject.name);
+                //Debug.DrawLine(gunEnd.transform.position, hit.point, Color.blue, 2f);
                 if (hit.collider.gameObject.layer == 7)
                 {
                     FirstPersonAIO.player.gameObject.GetComponent<PlayerManager>().takeDamage();
